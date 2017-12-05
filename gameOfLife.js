@@ -27,57 +27,77 @@ SOFTWARE.
 // ----------------------------------------------------
 
 const GRID_DEFAULT = [
-  1,0,0,0,0,0,0,0,0,0,
-  0,1,0,0,0,0,0,0,0,0,
-  0,0,1,0,0,0,0,0,0,0,
-  0,0,0,1,0,0,0,0,0,0,
-  0,0,0,0,1,0,0,0,0,0,
-  0,0,0,0,0,1,0,0,0,0,
-  0,0,0,0,0,0,1,0,0,0,
-  0,0,0,0,0,0,0,1,0,0,
-  0,0,0,0,0,0,0,0,1,0,
-  1,1,1,1,1,1,1,1,1,1
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0
 ];
 
 const GRID_WIDTH  = 10;
 const GRID_HEIGHT = 10;
 
 var GRID_DATA = [
-  1,0,0,0,0,0,0,0,0,0,
-  0,1,0,0,0,0,0,0,0,0,
-  0,0,1,0,0,0,0,0,0,0,
-  0,0,0,1,0,0,0,0,0,0,
-  0,0,0,0,1,0,0,0,0,0,
-  0,0,0,0,0,1,0,0,0,0,
-  0,0,0,0,0,0,1,0,0,0,
-  0,0,0,0,0,0,0,1,0,0,
-  0,0,0,0,0,0,0,0,1,0,
-  1,1,1,1,1,1,1,1,1,1
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0
 ];
 
 var GRID_UPDATE = [
-  1,0,0,0,0,0,0,0,0,0,
-  0,1,0,0,0,0,0,0,0,0,
-  0,0,1,0,0,0,0,0,0,0,
-  0,0,0,1,0,0,0,0,0,0,
-  0,0,0,0,1,0,0,0,0,0,
-  0,0,0,0,0,1,0,0,0,0,
-  0,0,0,0,0,0,1,0,0,0,
-  0,0,0,0,0,0,0,1,0,0,
-  0,0,0,0,0,0,0,0,1,0,
-  1,1,1,1,1,1,1,1,1,1
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0
 ];
 
 const CANVAS        = document.getElementById('myCanvas');
 const CANVAS_WIDTH  = CANVAS.width;
 const CANVAS_HEIGHT = CANVAS.height;
+const WIDTH_RATIO   = CANVAS_WIDTH  / GRID_WIDTH;
+const HEIGHT_RATIO  = CANVAS_HEIGHT / GRID_HEIGHT;
 
 var STOP = true;
-var FADING = true;
+var GRID = true;
 var ALIVE = [false, false, false, false, false, false, false, false, false];
-var FRAME_SPEED = 500;
+var FRAME_SPEED = 500.0;
 
-draw(255);
+
+// initialize
+
+init();
+draw();
+
+function init() {
+		for(var x = 0; x < 9; x++) {
+		var idStr = 'live' + x;
+		ALIVE[x] = document.getElementById(idStr).checked;
+
+		if(ALIVE[x]) {
+			console.log('whatever');
+		}
+	}
+
+	FRAME_SPEED = document.getElementById("speed").value;
+	GRID = document.getElementById("grid").checked;
+}
 
 // ----------------------------------------------------
 // onSubmit
@@ -85,22 +105,7 @@ draw(255);
 
 function startAnimation() {
 	//var form = document.getElementById("myForm").submit();
-
-	for(var x = 0; x < 9; x++) {
-		var idStr = 'live' + x;
-		ALIVE[x] = document.getElementById(idStr).checked;
-	}
-
-	if(document.getElementById("fade1").checked) {
-		FADING = true;
-
-	} else {
-		FADING = false;
-
-	}
-
-	FRAME_SPEED = document.getElementById("speed").value;
-
+	init();
 	if(STOP) {
 		STOP = false;
 		animateGrid();
@@ -110,25 +115,24 @@ function startAnimation() {
 // ----------------------------------------------------
 
 // draws grid data to canvas
-function draw(alpha) {
+function draw() {
+
   var ctx = CANVAS.getContext("2d");
   var imgData = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  var wratio = CANVAS_WIDTH  / GRID_WIDTH;
-  var hratio = CANVAS_HEIGHT / GRID_HEIGHT;
 
   for(var i = 0; i < GRID_HEIGHT; i++) {
     for(var j = 0; j < GRID_WIDTH; j++) {
 
       //draw rectangle
-      for(var x = 0; x < wratio; x++) {
-        var height = (i * hratio + x) * CANVAS_WIDTH;
-        for(var y = 0; y < hratio; y++) {
-          var width = (j * wratio + y);
+      for(var x = 0; x < WIDTH_RATIO; x++) {
+        var height = (i * HEIGHT_RATIO + x) * CANVAS_WIDTH;
+        for(var y = 0; y < HEIGHT_RATIO; y++) {
+          var width = (j * WIDTH_RATIO + y);
           var coord = (height + width) * 4;
           var cell = i * GRID_WIDTH + j;
           // living cell
           if(GRID_DATA[cell]) {
+
           	// healty cell
           	if(GRID_UPDATE[cell]) {
           		imgData.data[coord + 0] = 0;
@@ -138,35 +142,20 @@ function draw(alpha) {
 
           	// dying cell
           	} else {
-          		if(FADING) {
-          			imgData.data[coord + 0] = 0;
-          	  	imgData.data[coord + 1] = 0;
-          	  	imgData.data[coord + 2] = 0;
-              	imgData.data[coord + 3] = 255 - alpha;
-          		} else {
-          		  imgData.data[coord + 0] = 0;
-          	  	imgData.data[coord + 1] = 0;
-          	  	imgData.data[coord + 2] = 0;
-              	imgData.data[coord + 3] = 255;
-          		}
+        			imgData.data[coord + 0] = 126;
+        	  	imgData.data[coord + 1] = 0;
+        	  	imgData.data[coord + 2] = 0;
+            	imgData.data[coord + 3] = 255;
           	}
 
           // dead cell
           } else {
           	// new cell
           	if(GRID_UPDATE[cell]) {
-          		if(FADING) {
-          			imgData.data[coord + 0] = 0;
-          	  	imgData.data[coord + 1] = 0;
-          	  	imgData.data[coord + 2] = 0;
-              	imgData.data[coord + 3] = alpha;
-
-              } else {
-          			imgData.data[coord + 0] = 0;
-          	  	imgData.data[coord + 1] = 0;
-          	  	imgData.data[coord + 2] = 0;
-              	imgData.data[coord + 3] = 0;
-              }
+        			imgData.data[coord + 0] = 0;
+        	  	imgData.data[coord + 1] = 126;
+        	  	imgData.data[coord + 2] = 0;
+            	imgData.data[coord + 3] = 255;
 
           	// dead cell
           	} else {
@@ -181,21 +170,34 @@ function draw(alpha) {
     }
   }
 
+  //draw grid
+  if(GRID) {
+	  for(var i = 0; i < CANVAS_HEIGHT; i++) {
+	  	var height = i * CANVAS_WIDTH * 4;
+	  	for(var j = 0; j < CANVAS_WIDTH; j++) {
+	  		var coord = height + j * 4;
+	  		if(i % HEIGHT_RATIO == 0 || j % WIDTH_RATIO == 0 ) {
+					imgData.data[coord + 0] = 126;
+	    	  imgData.data[coord + 1] = 126;
+	    	  imgData.data[coord + 2] = 126;
+	        imgData.data[coord + 3] = 255;   
+	  		}
+	  	}
+	  }
+  }
+
   ctx.putImageData(imgData, 0, 0); 
 }
 
 function clearGrid() {
-  for(var x = 0; x < GRID_HEIGHT; x++) {
-    var width = x * GRID_WIDTH;
-    for(var y = 0; y < GRID_WIDTH; y++) {
-      GRID_DATA[width + y] = 0;
-    }
-  }
+  for(var x = 0; x < GRID_DATA.length; x++) {
+		GRID_DATA[x]   = 0;
+		GRID_UPDATE[x] = 0;
+	}
 }
 
 /*
  * returns true iff a fix-point is reached
- *
  */
 function fixpoint() {
   for(var x = 0; x < GRID_DATA.length; x++) {
@@ -227,15 +229,10 @@ function gameOfLife() {
           }
         }
       }
-      //don't count yourselfe
+      //don't count yourself
       count--;
 
-      //alive or dead?
-			var living = ALIVE[count];
-
-      var update = 0;
-      if(living) update = 1;
-      GRID_UPDATE[x * GRID_WIDTH + y] = update;
+      GRID_UPDATE[x * GRID_WIDTH + y] = ALIVE[count];
     }
   }
 }
@@ -248,22 +245,22 @@ function updateGrid() {
 
 function animateGrid() {
   STOP = false;
-  var frameCount = 0;
-  var frameStep  = 5;
+  var frameCount = 0.0;
+  var frameStep  = 10.0;
   var id = setInterval(frame, frameStep);
   function frame() {
   	frameCount += frameStep;
 
     if (STOP) {
       clearInterval(id);
-
     } else {
     	if(frameCount >= FRAME_SPEED) {
     		frameCount -= FRAME_SPEED;
     		updateGrid();
     		gameOfLife();
     	}
-  		draw(255 * (frameCount / frameStep));     
+  		//ALPHA = (frameCount / FRAME_SPEED) * 255.0;
+    	draw();
     }
   }
 }
@@ -272,7 +269,32 @@ function stopAnimation() {
   STOP = true;
 }
 
-
 function resetAnimation() {
-	//TODO
+	stopAnimation();
+	for(var x = 0; x < GRID_DATA.length; x++) {
+		GRID_DATA[x]   = GRID_DEFAULT[x];
+		GRID_UPDATE[x] = GRID_DEFAULT[x];
+	}
+	draw();
+}
+
+function canvasClicked(event) {
+	//console.log('canvas was clicked');
+  const pos_left = event.pageX - event.currentTarget.offsetLeft;
+  const pos_top  = event.pageY - event.currentTarget.offsetTop;
+  //console.log(pos_left, pos_top);
+  const xGrid = Math.floor(pos_left / WIDTH_RATIO);
+  const yGrid = Math.floor(pos_top  / HEIGHT_RATIO);
+
+  GRID_DATA[yGrid * GRID_WIDTH + xGrid] = !GRID_DATA[yGrid * GRID_WIDTH + xGrid];
+
+  gameOfLife();
+  draw();
+}
+
+function oneStepAnimation() {
+	gameOfLife();
+	updateGrid();
+	gameOfLife();
+	draw();
 }

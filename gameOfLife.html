@@ -7,30 +7,30 @@
 	</head>
 	<body>
 		<h1>Game of Life</h1>
-		<canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+		<canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000;" onclick="canvasClicked(event)"></canvas>
 		<form name="myForm" action="/action_page.php" onsubmit="startAnimation()">
 			Living Neighbours :
 			<input id="live0" type="checkbox" name="living" value="0"> 0
-      <input id="live1" type="checkbox" name="living" value="1"> 1
-      <input id="live2" type="checkbox" name="living" value="2" checked> 2
-      <input id="live3" type="checkbox" name="living" value="3" checked> 3
-      <input id="live4" type="checkbox" name="living" value="4"> 4
-      <input id="live5" type="checkbox" name="living" value="5"> 5
-      <input id="live6" type="checkbox" name="living" value="6"> 6
-      <input id="live7" type="checkbox" name="living" value="7"> 7
-      <input id="live8" type="checkbox" name="living" value="8"> 8
-      <br>
-      Fading :
-      <input id="fade1" type="radio" name="fading" checked> yes
-  		<input id="fade2" type="radio" name="fading"> no
-  		<br>
-  		Frame Speed :
-  		<input id="speed" type="number" name="quantity" min="1" max="5000" value="500">
-  		<br>
+		    <input id="live1" type="checkbox" name="living" value="1"> 1
+		    <input id="live2" type="checkbox" name="living" value="2" checked> 2
+		    <input id="live3" type="checkbox" name="living" value="3" checked> 3
+		    <input id="live4" type="checkbox" name="living" value="4"> 4
+		    <input id="live5" type="checkbox" name="living" value="5"> 5
+		    <input id="live6" type="checkbox" name="living" value="6"> 6
+		    <input id="live7" type="checkbox" name="living" value="7"> 7
+		    <input id="live8" type="checkbox" name="living" value="8"> 8
+		    <br>
+		  	Grid :
+		  	<input id="grid"  type="checkbox" checked>		  	
+		  	<br>
+		  	Frame Speed :
+		  	<input id="speed" type="number" name="quantity" min="1" max="5000" value="500">
+		  	<br>
 			<input type="submit" value="Animate">
 		</form>
 		<button onclick="stopAnimation()">Stop</button>	
-		<button onclick="resetAnimation()">Reset</button>	
+		<button onclick="resetAnimation()">Reset</button>
+		<button onclick="oneStepAnimation()">Next</button>	
 		<script src="gameOfLife.js"></script>
 	</body>
 </html>
