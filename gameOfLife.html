@@ -1,36 +1,55 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	  <meta charset="UTF-8"> 
+		<meta charset="UTF-8"> 
 		<link rel="stylesheet" type="text/css" href="gameOfLife.css">
 		<title>Game of Life</title>
 	</head>
 	<body>
 		<h1>Game of Life</h1>
-		<canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000;" onclick="canvasClicked(event)"></canvas>
-		<form name="myForm" action="/action_page.php" onsubmit="startAnimation()">
-			Living Neighbours :
-			<input id="live0" type="checkbox" name="living" value="0"> 0
-		    <input id="live1" type="checkbox" name="living" value="1"> 1
-		    <input id="live2" type="checkbox" name="living" value="2" checked> 2
-		    <input id="live3" type="checkbox" name="living" value="3" checked> 3
-		    <input id="live4" type="checkbox" name="living" value="4"> 4
-		    <input id="live5" type="checkbox" name="living" value="5"> 5
-		    <input id="live6" type="checkbox" name="living" value="6"> 6
-		    <input id="live7" type="checkbox" name="living" value="7"> 7
-		    <input id="live8" type="checkbox" name="living" value="8"> 8
-		    <br>
-		  	Grid :
-		  	<input id="grid"  type="checkbox" checked>		  	
-		  	<br>
-		  	Frame Speed :
-		  	<input id="speed" type="number" name="quantity" min="1" max="5000" value="500">
-		  	<br>
-			<input type="submit" value="Animate">
-		</form>
-		<button onclick="stopAnimation()">Stop</button>	
-		<button onclick="resetAnimation()">Reset</button>
-		<button onclick="oneStepAnimation()">Next</button>	
+		<div style="width:100%;">
+			<div style="float:left; width:50%;">
+				<canvas id="myCanvas" width="500" height="500" style="border:1px solid #000000;" onclick="canvasClicked(event)"></canvas>
+			</div>
+			<div style="float:left; width:40%; margin-left:10pt">
+				<h2>Statistics</h2>
+				Living Cells:
+				<br>
+				Emerging Cells:
+				<br>
+				Dead Cells:
+				<br>
+				Dying Cells:
+
+				<h2>Options</h2>
+				Living Neighbours :
+				<input id="live0" type="checkbox" name="living" value="0"> 0
+				<input id="live1" type="checkbox" name="living" value="1"> 1
+				<input id="live2" type="checkbox" name="living" value="2" checked> 2
+				<input id="live3" type="checkbox" name="living" value="3" checked> 3
+				<input id="live4" type="checkbox" name="living" value="4"> 4
+				<input id="live5" type="checkbox" name="living" value="5"> 5
+				<input id="live6" type="checkbox" name="living" value="6"> 6
+				<input id="live7" type="checkbox" name="living" value="7"> 7
+				<input id="live8" type="checkbox" name="living" value="8"> 8
+				<br>
+				Grid :
+				<input id="grid"  type="checkbox" checked>        
+				<br>
+				Frame Speed :
+				<input id="speed" type="number" name="quantity" min="1" max="5000" value="500">
+				<br>
+				<button id="animationButton" onclick="animation()">Animate</button>
+				<button onclick="nextStepAnimation()">Next</button>
+				<button onclick="resetAnimation()">Reset</button>
+			</div>
+		</div>
+		<footer>
+			<!--<p>Posted by: Manuel</p>-->
+			<p>
+				Contact information: <a href="mailto:manuel.stark.12345@gmail.com">manuel.stark.12345@gmail.com</a>
+			</p>
+		</footer>
 		<script src="gameOfLife.js"></script>
 	</body>
 </html>

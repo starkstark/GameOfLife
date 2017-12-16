@@ -1,1 +1,1 @@
-pathfinding v 0.1, Manuel Stark 2017
+GameOfLife, Manuel Stark 2017

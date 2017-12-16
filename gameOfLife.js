@@ -68,31 +68,52 @@ var GRID_UPDATE = [
   0,0,0,0,0,0,0,0,0,0
 ];
 
-const CANVAS        = document.getElementById('myCanvas');
-const CANVAS_WIDTH  = CANVAS.width;
-const CANVAS_HEIGHT = CANVAS.height;
-const WIDTH_RATIO   = CANVAS_WIDTH  / GRID_WIDTH;
-const HEIGHT_RATIO  = CANVAS_HEIGHT / GRID_HEIGHT;
+const CANVAS      = document.getElementById('myCanvas');
+var WIDTH_RATIO   = CANVAS.width  / GRID_WIDTH;
+var HEIGHT_RATIO  = CANVAS.height / GRID_HEIGHT;
 
-var STOP = true;
-var GRID = true;
+var STOP  = true;
+var GRID  = true;
 var ALIVE = [false, false, false, false, false, false, false, false, false];
 var FRAME_SPEED = 500.0;
 
 
 // initialize
 
-init();
+resizeEvent();
+options();
 draw();
 
-function init() {
-		for(var x = 0; x < 9; x++) {
+window.addEventListener('resize', resizeEvent);
+
+function resizeEvent(){
+  console.log("resize");
+
+  var width  = 0.4 * document.documentElement.clientWidth;
+  var height = 0.6 * document.documentElement.clientHeight;
+
+  WIDTH_RATIO   = Math.round(width  / GRID_WIDTH);
+  HEIGHT_RATIO  = Math.round(height / GRID_HEIGHT);
+
+  CANVAS.width  = Math.floor(1.0 * WIDTH_RATIO  * GRID_WIDTH);
+  CANVAS.height = Math.floor(1.0 * HEIGHT_RATIO * GRID_HEIGHT);
+
+  console.log('Canvas width  : ' + CANVAS.width);
+  console.log('Canvas height : ' + CANVAS.height);
+  console.log('wratio : ' + WIDTH_RATIO);
+  console.log('hratio : ' + HEIGHT_RATIO);
+
+  draw();
+}
+
+// ----------------------------------------------------
+// Get Options
+// ----------------------------------------------------
+
+function options() {
+	for(var x = 0; x < 9; x++) {
 		var idStr = 'live' + x;
 		ALIVE[x] = document.getElementById(idStr).checked;
-
-		if(ALIVE[x]) {
-			console.log('whatever');
-		}
 	}
 
 	FRAME_SPEED = document.getElementById("speed").value;
@@ -100,36 +121,69 @@ function init() {
 }
 
 // ----------------------------------------------------
-// onSubmit
+// Animation Control
 // ----------------------------------------------------
 
-function startAnimation() {
-	//var form = document.getElementById("myForm").submit();
-	init();
+function animation() {
 	if(STOP) {
-		STOP = false;
-		animateGrid();
+		startAnimation();
+	} else {
+		stopAnimation();
 	}
 }
 
+function startAnimation() {
+	STOP = false;
+	var animateButton = document.getElementById("animationButton");
+	animateButton.innerHTML = "Stop";
+	animateGrid();
+}
+
+function stopAnimation() {
+  STOP = true;
+	var animateButton = document.getElementById("animationButton");
+	animateButton.innerHTML = "Animate";
+}
+
+function resetAnimation() {
+	stopAnimation();
+
+	for(var x = 0; x < GRID_DATA.length; x++) {
+		GRID_DATA[x]   = GRID_DEFAULT[x];
+		GRID_UPDATE[x] = GRID_DEFAULT[x];
+	}
+	draw();
+}
+
+function nextStepAnimation() {
+	stopAnimation();
+
+	gameOfLife();
+	updateGrid();
+	gameOfLife();
+	draw();
+}
+
+// ----------------------------------------------------
+// Drawing
 // ----------------------------------------------------
 
 // draws grid data to canvas
 function draw() {
 
   var ctx = CANVAS.getContext("2d");
-  var imgData = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  var imgData = ctx.getImageData(0, 0, CANVAS.width, CANVAS.height);
 
   for(var i = 0; i < GRID_HEIGHT; i++) {
     for(var j = 0; j < GRID_WIDTH; j++) {
-
+    	var cell = i * GRID_WIDTH + j;
       //draw rectangle
       for(var x = 0; x < WIDTH_RATIO; x++) {
-        var height = (i * HEIGHT_RATIO + x) * CANVAS_WIDTH;
+        var height = (i * HEIGHT_RATIO + x) * CANVAS.width;
         for(var y = 0; y < HEIGHT_RATIO; y++) {
           var width = (j * WIDTH_RATIO + y);
+
           var coord = (height + width) * 4;
-          var cell = i * GRID_WIDTH + j;
           // living cell
           if(GRID_DATA[cell]) {
 
@@ -172,11 +226,11 @@ function draw() {
 
   //draw grid
   if(GRID) {
-	  for(var i = 0; i < CANVAS_HEIGHT; i++) {
-	  	var height = i * CANVAS_WIDTH * 4;
-	  	for(var j = 0; j < CANVAS_WIDTH; j++) {
+	  for(var i = 0; i < CANVAS.height; i++) {
+	  	var height = i * CANVAS.width * 4;
+	  	for(var j = 0; j < CANVAS.width; j++) {
 	  		var coord = height + j * 4;
-	  		if(i % HEIGHT_RATIO == 0 || j % WIDTH_RATIO == 0 ) {
+	  		if(i % HEIGHT_RATIO < 1 || j % WIDTH_RATIO < 1 ) {
 					imgData.data[coord + 0] = 126;
 	    	  imgData.data[coord + 1] = 126;
 	    	  imgData.data[coord + 2] = 126;
@@ -265,19 +319,6 @@ function animateGrid() {
   }
 }
 
-function stopAnimation() {
-  STOP = true;
-}
-
-function resetAnimation() {
-	stopAnimation();
-	for(var x = 0; x < GRID_DATA.length; x++) {
-		GRID_DATA[x]   = GRID_DEFAULT[x];
-		GRID_UPDATE[x] = GRID_DEFAULT[x];
-	}
-	draw();
-}
-
 function canvasClicked(event) {
 	//console.log('canvas was clicked');
   const pos_left = event.pageX - event.currentTarget.offsetLeft;
@@ -288,13 +329,9 @@ function canvasClicked(event) {
 
   GRID_DATA[yGrid * GRID_WIDTH + xGrid] = !GRID_DATA[yGrid * GRID_WIDTH + xGrid];
 
+
+  console.log('Clicked cell : ' + xGrid + "," + yGrid);
+
   gameOfLife();
   draw();
-}
-
-function oneStepAnimation() {
-	gameOfLife();
-	updateGrid();
-	gameOfLife();
-	draw();
 }
