@@ -69,27 +69,29 @@ var GRID_UPDATE = [
 ];
 
 const CANVAS      = document.getElementById('myCanvas');
-var WIDTH_RATIO   = CANVAS.width  / GRID_WIDTH;
-var HEIGHT_RATIO  = CANVAS.height / GRID_HEIGHT;
+//var WIDTH_RATIO   = CANVAS.width  / GRID_WIDTH;
+//var HEIGHT_RATIO  = CANVAS.height / GRID_HEIGHT;
 
 var STOP  = true;
 var GRID  = true;
 var ALIVE = [false, false, false, false, false, false, false, false, false];
-var FRAME_SPEED = 500.0;
 
+var ANIMATION_SPEED_CHANGED = false;
 
 // initialize
 
 resizeEvent();
-options();
+initOptions();
 draw();
-
+updateStatistics();
 window.addEventListener('resize', resizeEvent);
 
-function resizeEvent(){
-  console.log("resize");
+// ----------------------------------------------------
+// Resize Event
+// ----------------------------------------------------
 
-  var width  = 0.4 * document.documentElement.clientWidth;
+function resizeEvent(){
+  var width  = 0.49 * document.documentElement.clientWidth;
   var height = 0.6 * document.documentElement.clientHeight;
 
   WIDTH_RATIO   = Math.round(width  / GRID_WIDTH);
@@ -97,27 +99,35 @@ function resizeEvent(){
 
   CANVAS.width  = Math.floor(1.0 * WIDTH_RATIO  * GRID_WIDTH);
   CANVAS.height = Math.floor(1.0 * HEIGHT_RATIO * GRID_HEIGHT);
-
-  console.log('Canvas width  : ' + CANVAS.width);
-  console.log('Canvas height : ' + CANVAS.height);
-  console.log('wratio : ' + WIDTH_RATIO);
-  console.log('hratio : ' + HEIGHT_RATIO);
-
   draw();
 }
 
 // ----------------------------------------------------
-// Get Options
+// Option Events
 // ----------------------------------------------------
 
-function options() {
-	for(var x = 0; x < 9; x++) {
-		var idStr = 'live' + x;
-		ALIVE[x] = document.getElementById(idStr).checked;
-	}
+function initOptions() {
+  livingChange();
+  gridChange();
+  animationSpeedChange();
+}
 
-	FRAME_SPEED = document.getElementById("speed").value;
-	GRID = document.getElementById("grid").checked;
+function livingChange() {
+  for(var x = 0; x < 9; x++) {
+    var idStr = 'live' + x;
+    ALIVE[x] = document.getElementById(idStr).checked;
+  }
+  gameOfLife();
+  draw();
+}
+
+function gridChange() {
+  GRID = document.getElementById("grid").checked;
+  draw();
+}
+
+function animationSpeedChange() {
+  var ANIMATION_SPEED_CHANGED = true;
 }
 
 // ----------------------------------------------------
@@ -171,6 +181,9 @@ function nextStepAnimation() {
 // draws grid data to canvas
 function draw() {
 
+  const widthRatio  = CANVAS.width  / GRID_WIDTH;
+  const heightRatio = CANVAS.height / GRID_HEIGHT;
+
   var ctx = CANVAS.getContext("2d");
   var imgData = ctx.getImageData(0, 0, CANVAS.width, CANVAS.height);
 
@@ -178,10 +191,11 @@ function draw() {
     for(var j = 0; j < GRID_WIDTH; j++) {
     	var cell = i * GRID_WIDTH + j;
       //draw rectangle
-      for(var x = 0; x < WIDTH_RATIO; x++) {
-        var height = (i * HEIGHT_RATIO + x) * CANVAS.width;
-        for(var y = 0; y < HEIGHT_RATIO; y++) {
-          var width = (j * WIDTH_RATIO + y);
+      for(var x = 0; x < heightRatio; x++) {
+        var height = Math.round(i * heightRatio + x) * CANVAS.width;
+
+        for(var y = 0; y < widthRatio; y++) {
+          var width = Math.round(j * widthRatio) + y;
 
           var coord = (height + width) * 4;
           // living cell
@@ -217,7 +231,7 @@ function draw() {
           	  imgData.data[coord + 1] = 255;
           	  imgData.data[coord + 2] = 255;
               imgData.data[coord + 3] = 255;          		
-          	}  
+          	}
           }
         }
       }
@@ -251,7 +265,8 @@ function clearGrid() {
 }
 
 /*
- * returns true iff a fix-point is reached
+ * returns true iff a fixpoint is reached
+ * Stops animation iff fixpoint is reached
  */
 function fixpoint() {
   for(var x = 0; x < GRID_DATA.length; x++) {
@@ -259,6 +274,7 @@ function fixpoint() {
       return false;
     }
   }
+  stopAnimation();
   return true;
 }
 
@@ -270,8 +286,9 @@ function gameOfLife() {
       var count = 0;
 
       //count living neighbours
-      for(var i = -1; i < 2; i++) {
-        for(var j = -1; j < 2; j++) {
+      for(var i = -1; i <= 1; i++) {
+        for(var j = -1; j <= 1; j++) {
+          if(i == 0 && j == 0) continue;
           x2 = x + i;
           y2 = y + j;
           if(x2 >= 0 && x2 < GRID_HEIGHT) {
@@ -283,13 +300,14 @@ function gameOfLife() {
           }
         }
       }
-      //don't count yourself
-      count--;
 
       GRID_UPDATE[x * GRID_WIDTH + y] = ALIVE[count];
     }
   }
+
+  updateStatistics();
 }
+
 
 function updateGrid() {
 	for(var x = 0; x < GRID_DATA.length; x++) {
@@ -299,24 +317,23 @@ function updateGrid() {
 
 function animateGrid() {
   STOP = false;
-  var frameCount = 0.0;
-  var frameStep  = 10.0;
-  var id = setInterval(frame, frameStep);
+  var speed = (101 - document.getElementById("speed").value) * 10;
+  var id = setInterval(frame, speed);
   function frame() {
-  	frameCount += frameStep;
-
-    if (STOP) {
+    if (STOP || ANIMATION_SPEED_CHANGED) {
       clearInterval(id);
+      if(ANIMATION_SPEED_CHANGED) {
+        ANIMATION_SPEED_CHANGED = false;
+        animateGrid();
+      }
+
     } else {
-    	if(frameCount >= FRAME_SPEED) {
-    		frameCount -= FRAME_SPEED;
-    		updateGrid();
-    		gameOfLife();
-    	}
-  		//ALPHA = (frameCount / FRAME_SPEED) * 255.0;
-    	draw();
+      updateGrid();
+      gameOfLife();
+      draw();
     }
   }
+
 }
 
 function canvasClicked(event) {
@@ -329,9 +346,50 @@ function canvasClicked(event) {
 
   GRID_DATA[yGrid * GRID_WIDTH + xGrid] = !GRID_DATA[yGrid * GRID_WIDTH + xGrid];
 
-
-  console.log('Clicked cell : ' + xGrid + "," + yGrid);
-
   gameOfLife();
   draw();
+}
+
+function updateStatistics() {
+  var healhtyCount  = 0;
+  var deadCount     = 0;
+  var dyingCount    = 0;
+  var emergingCount = 0;
+
+  //count cells
+  for(var i = 0; i < GRID_HEIGHT; i++) {
+    var width = i * GRID_WIDTH;
+    
+    for(var j = 0; j < GRID_WIDTH; j++) {
+      var cell = width + j;
+
+      if(GRID_DATA[cell]) {
+        if(GRID_UPDATE[cell]) {
+          healhtyCount++;
+        } else {
+          dyingCount++;
+        }
+
+      } else {
+        if(GRID_UPDATE[cell]) {
+          emergingCount++;
+        } else {
+          deadCount++;
+        }
+      }
+    }
+  }
+
+  document.getElementById("healthyCells").innerHTML  = healhtyCount;
+  document.getElementById("deadCells").innerHTML     = deadCount;
+  document.getElementById("dyingCells").innerHTML    = dyingCount;
+  document.getElementById("emergingCells").innerHTML = emergingCount;
+
+  var fixpointField = document.getElementById("fixpoint");
+  if(fixpoint()) {
+    fixpointField.innerHTML = "Fixpoint";
+  } else {
+    fixpointField.innerHTML = "No Fixpoint";
+  }
+
 }
